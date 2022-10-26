@@ -5,63 +5,10 @@
 #include <map>
 #include <vector>
 #include "preprocess.h"
-
+# include "csv.h"
 using namespace std;
 
 
-class ReadCSV {
-public:
-    string fileName;
-
-    vector<vector<string>> readCsv() {
-        ifstream infile(this->fileName);
-        vector<vector<string> > data;
-        vector<string> record;
-
-        string s;
-        istringstream ss(s);
-
-        if (infile) {
-            getline(infile, s);
-            istringstream ss(s);
-            int i = 0;
-            while (i < 3) {
-                string s;
-                if (!getline(ss, s, ',')) break;
-                record.push_back(s);
-                i += 1;
-            }
-            data.push_back(record);
-        }
-
-
-        while (infile) {
-            string s;
-            string delimiter = ",\"";
-            if (!getline(infile, s)) break;
-            vector<string> record;
-
-            istringstream ss(s);
-
-            int i = 0;
-
-            auto start = 0U;
-            auto end = s.find(delimiter);
-            while (end != std::string::npos) {
-                record.push_back(s.substr(start, end - start));
-                start = end + delimiter.length();
-                end = s.find(delimiter, start);
-            }
-            record.push_back(s.substr(start, end));
-            data.push_back(record);
-
-        }
-        if (!infile.eof()) {
-            cerr << "Fooey!\n";
-        }
-        return data;
-    }
-};
 
 vector<vector<string>> preprocessData() {
     vector<string> message_data;
@@ -84,13 +31,13 @@ vector<vector<string>> preprocessData() {
 }
 
 void read_and_preprocess() {
-    // Reading CSV file and store it inside a vector
-    ReadCSV csvReader;
-    // Access attributes and set values
-    csvReader.fileName = "../data/train_sample.csv";
-    // get data
-    vector<vector<string>> data = csvReader.readCsv();
-    vector<string> label_data;
-    vector<string> message_data;
+    vector<vector<string>>  data;
+    // Open file
+    csvstream csvin("../data/train_sample.csv");
+    // Rows have key = column name, value = cell datum
+    map<string, string> row;
 
+    while (csvin >> row) {
+        data.push_back(vector<string>{row["id"], row["article"], row["highlights"]});
+    }
 }
